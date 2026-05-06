@@ -3,1140 +3,667 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bienestar en tu Mente - Areandina</title>
+    <title>Bienestar Areandina - App Oficial</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Phosphor Icons para iconografía amigable y moderna -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
-            -webkit-tap-highlight-color: transparent;
+        :root { 
+            --andina-green: #6DBB2D; 
+            --andina-dark: #4E9A06; 
+            --andina-blue: #002D62; 
         }
         
-        .text-areandina { color: #007A33; }
-        .bg-areandina { background-color: #007A33; }
-        .bg-areandina-light { background-color: #E5F2EB; }
-
-        .fade-in { animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .pulse-soft { animation: pulseSoft 2s infinite; }
-        @keyframes pulseSoft {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        /* Animación para el ejercicio de respiración */
-        @keyframes breatheCycle {
-            0% { transform: scale(1); opacity: 0.8; }
-            28% { transform: scale(1.6); opacity: 1; } /* Inhala (4s de 14s total) */
-            57% { transform: scale(1.6); opacity: 1; } /* Sostén (4s) */
-            100% { transform: scale(1); opacity: 0.8; } /* Exhala (6s) */
-        }
-        .animate-breathing {
-            animation: breatheCycle 14s infinite linear;
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 1.25rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        .modal-overlay {
-            display: none;
-            backdrop-filter: blur(5px);
-            animation: fadeIn 0.2s ease-out;
+        body { 
+            font-family: 'Inter', sans-serif; 
+            transition: background 1s ease; 
+            overflow: hidden; 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            background-color: #f8fafc; /* Fallback */
         }
         
-        .progress-bar-fill {
-            transition: width 1s linear;
+        /* Glassmorphism */
+        .glass { 
+            background: rgba(255, 255, 255, 0.4); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.5); 
+            border-radius: 2.5rem; 
         }
+        
+        /* CICLOS SOLARES */
+        .theme-am { background: linear-gradient(135deg, #e4f7d3 0%, #d9f99d 100%); } 
+        .theme-sunset { background: linear-gradient(135deg, #ffedd5 0%, #fef08a 100%); } 
+        .theme-pm { background: linear-gradient(135deg, #1a1a1a 0%, #002D62 100%); color: white; }
 
-        /* Estilo para notificaciones Toast */
-        .toast-enter {
-            transform: translateY(0);
-            opacity: 1;
+        /* ASTROS */
+        .celestial { position: absolute; pointer-events: none; z-index: 0; border-radius: 50%; display: none; }
+        .theme-am #sun { display: block; top: -30px; right: -30px; width: 250px; height: 250px; background: radial-gradient(circle, #fde047 0%, rgba(253,224,71,0) 70%); filter: blur(15px); animation: pulse 4s infinite alternate; }
+        .theme-sunset #sunset { display: block; top: 40px; right: -40px; width: 280px; height: 280px; background: radial-gradient(circle, #fb923c 0%, rgba(251,146,60,0) 70%); filter: blur(20px); animation: pulse 5s infinite alternate; }
+        .theme-pm #moon { display: block; top: 50px; right: 50px; width: 70px; height: 80px; background: radial-gradient(circle, #f1f5f9 0%, rgba(255,255,255,0.4) 100%); box-shadow: 0 0 40px rgba(255,255,255,0.3); }
+        
+        .stars { display: none; position: absolute; inset: 0; z-index: 0; }
+        .theme-pm .stars { display: block; }
+        .star { position: absolute; background: white; border-radius: 50%; }
+
+        @keyframes pulse { 
+            from { opacity: 0.6; transform: scale(1); } 
+            to { opacity: 1; transform: scale(1.1); } 
         }
-        .toast-leave {
-            transform: translateY(-150%);
-            opacity: 0;
+        
+        /* Cross-browser scrollbar hiding */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
+        .no-scrollbar::-webkit-scrollbar { 
+            display: none; /* Chrome, Safari and Opera */
+        }
+        
+        .active-nav { color: var(--andina-green) !important; transform: scale(1.2); }
     </style>
 </head>
-<body class="text-slate-800 h-screen flex justify-center items-center overflow-hidden">
+<body class="theme-am" id="body-theme">
 
-    <!-- Contenedor del "Teléfono" -->
-    <div class="w-full h-full sm:w-[400px] sm:h-[800px] sm:max-h-[95vh] bg-slate-50 sm:rounded-[2.5rem] sm:border-[8px] border-slate-800 relative overflow-hidden shadow-2xl flex flex-col">
+    <!-- Main App Container -->
+    <div class="w-full h-full sm:w-[390px] sm:h-[844px] relative overflow-hidden sm:rounded-[3.5rem] sm:border-[10px] border-slate-950 shadow-2xl flex flex-col transition-all bg-white/10 backdrop-blur-md" id="app-container">
         
-        <!-- ================= VISTA: LOGIN / REGISTRO ================= -->
-        <div id="view-login" class="absolute inset-0 bg-white z-50 flex flex-col p-8 fade-in">
-            <div class="flex-1 flex flex-col justify-center items-center text-center space-y-6">
-                <div class="w-24 h-24 bg-areandina-light rounded-full flex items-center justify-center mb-4 pulse-soft">
-                    <i class="ph-fill ph-plant text-5xl text-areandina"></i>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-800">Bienestar en tu Mente</h1>
-                    <p class="text-slate-500 mt-2 text-sm">Tu espacio seguro en la Areandina.</p>
-                </div>
-                
-                <form id="loginForm" class="w-full space-y-4 mt-8" onsubmit="handleLogin(event)">
-                    <div class="space-y-1 text-left">
-                        <label class="text-xs font-semibold text-slate-500 uppercase ml-1">Correo Institucional</label>
-                        <div class="relative">
-                            <i class="ph ph-envelope-simple absolute left-3 top-3.5 text-slate-400 text-lg"></i>
-                            <input type="email" id="emailInput" required placeholder="usuario@areandina.edu.co" class="w-full bg-slate-100 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-areandina outline-none transition-all">
-                        </div>
-                    </div>
-                    <div class="space-y-1 text-left">
-                        <label class="text-xs font-semibold text-slate-500 uppercase ml-1">Contraseña</label>
-                        <div class="relative">
-                            <i class="ph ph-lock-key absolute left-3 top-3.5 text-slate-400 text-lg"></i>
-                            <input type="password" required placeholder="••••••••" class="w-full bg-slate-100 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-areandina outline-none transition-all">
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full bg-areandina text-white font-semibold rounded-xl py-3.5 mt-4 shadow-lg shadow-green-900/20 active:scale-95 transition-transform">
-                        Ingresar a mi espacio
-                    </button>
-                </form>
+        <!-- Celestial Bodies Background -->
+        <div id="sun" class="celestial"></div>
+        <div id="sunset" class="celestial"></div>
+        <div id="moon" class="celestial"></div>
+        <div class="stars" id="stars-container"></div>
+
+        <!-- Login View -->
+        <div id="view-login" class="absolute inset-0 bg-white/95 backdrop-blur-2xl z-[200] flex flex-col p-10 items-center justify-center transition-all duration-500">
+            <div class="w-24 h-24 bg-[#6DBB2D] rounded-[2.5rem] flex items-center justify-center shadow-xl mb-6 transform rotate-3">
+                <i class="ph-fill ph-plant text-5xl text-white"></i>
             </div>
-            <div class="text-center pb-4 text-xs text-slate-400">
-                Proyecto Cátedra Pablo Oliveros Marmolejo
-            </div>
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tighter">Areandina</h1>
+            <p class="text-slate-500 mb-10 text-center font-medium">Bienestar en tu Mente</p>
+            
+            <form onsubmit="handleLogin(event)" class="w-full space-y-4">
+                <input type="email" id="email-input" required placeholder="ssaenz19@areandina.edu.co" class="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 shadow-sm outline-none text-slate-800">
+                <select id="sede-input" class="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 shadow-sm outline-none text-slate-800">
+                    <option value="Bogotá">Sede Bogotá (D.C)</option>
+                    <option value="Pereira">Sede Pereira</option>
+                    <option value="Valledupar">Sede Valledupar</option>
+                </select>
+                <button type="submit" class="w-full bg-[#6DBB2D] text-white font-bold rounded-2xl py-4 shadow-lg active:scale-95 transition-transform">Ingresar</button>
+            </form>
         </div>
 
-        <!-- ================= VISTA: APP PRINCIPAL ================= -->
-        <div id="view-main" class="hidden flex-1 flex flex-col h-full bg-slate-50 relative">
+        <!-- Main App Content -->
+        <div id="view-main" class="flex-1 flex flex-col h-full relative z-10 hidden opacity-0 transition-all duration-500">
             
-            <div class="flex-1 relative overflow-hidden transition-colors duration-1000" id="main-bg-container">
+            <div id="main-scroll" class="flex-1 overflow-y-auto no-scrollbar pb-32">
                 
-                <!-- Efectos de Fondo Dinámicos -->
-                <div id="sun-effect" class="absolute -top-20 -right-20 w-80 h-80 bg-yellow-400 rounded-full mix-blend-multiply filter blur-[80px] opacity-0 transition-opacity duration-1000 pointer-events-none z-0"></div>
-                <div id="cloud-effect" class="absolute -top-10 -left-10 w-full h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-[80px] opacity-0 transition-opacity duration-1000 pointer-events-none z-0"></div>
-
-                <!-- === PESTAÑA 1: INICIO === -->
-                <div id="tab-inicio" class="tab-content h-full overflow-y-auto no-scrollbar pb-24 fade-in relative z-10">
-                    <header class="pt-12 pb-4 px-6 bg-transparent z-10 sticky top-0 backdrop-blur-md border-b border-white/20">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="text-slate-500 text-sm">¡Hola, <span id="userNameDisplay" class="font-semibold text-slate-700">Estudiante</span>! 👋</p>
-                                <h2 class="text-xl font-bold text-slate-800">¿Cómo te sientes hoy?</h2>
-                            </div>
-                            <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
-                                <img id="userAvatarSmall" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Areandina&backgroundColor=e2e8f0" alt="Avatar" class="w-full h-full">
-                            </div>
-                        </div>
-
-                        <div class="flex justify-between mt-6 px-2" id="moodSelector">
-                            <button onclick="selectMood('mal')" class="flex flex-col items-center space-y-2 group">
-                                <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-3xl group-active:scale-90 transition-all border border-transparent mood-btn" data-mood="mal">🌧️</div>
-                                <span class="text-xs font-medium text-slate-500">Abrumado</span>
-                            </button>
-                            <button onclick="selectMood('regular')" class="flex flex-col items-center space-y-2 group">
-                                <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-3xl group-active:scale-90 transition-all border border-transparent mood-btn" data-mood="regular">☁️</div>
-                                <span class="text-xs font-medium text-slate-500">Regular</span>
-                            </button>
-                            <button onclick="selectMood('bien')" class="flex flex-col items-center space-y-2 group">
-                                <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-3xl group-active:scale-90 transition-all border border-transparent mood-btn" data-mood="bien">☀️</div>
-                                <span class="text-xs font-medium text-slate-500">Bien</span>
-                            </button>
-                        </div>
-                    </header>
-
-                    <div id="moodFeedback" class="hidden mx-6 mt-6 p-4 rounded-2xl fade-in text-sm border shadow-sm"></div>
-
-                    <div class="px-6 mt-6">
-                        <button onclick="showSosModal()" class="w-full glass-card bg-rose-50 border-rose-200 p-4 flex items-center justify-between active:scale-95 transition-transform shadow-sm shadow-rose-100">
-                            <div class="flex items-center space-x-4">
-                                <div class="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
-                                    <i class="ph-fill ph-phone-call text-2xl"></i>
-                                </div>
-                                <div class="text-left">
-                                    <h3 class="font-bold text-rose-700">Botón de Ayuda (SOS)</h3>
-                                    <p class="text-xs text-rose-600/80">Habla con un psicólogo ahora</p>
-                                </div>
-                            </div>
-                            <i class="ph-bold ph-caret-right text-rose-400"></i>
-                        </button>
-                    </div>
-
-                    <!-- Red de Apoyo / Mentores con WhatsApp -->
-                    <div class="mt-8 pl-6">
-                        <div class="flex justify-between items-end mb-4 pr-6">
-                            <div>
-                                <h3 class="font-bold text-slate-800 text-lg">Mentores Disponibles</h3>
-                                <p class="text-xs text-slate-500">Conecta vía WhatsApp Institucional</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex overflow-x-auto space-x-4 pb-4 pr-6 no-scrollbar snap-x">
-                            <!-- Carlos: Abre WhatsApp -->
-                            <div onclick="openWhatsApp('Carlos', 'Psicología')" class="snap-start min-w-[130px] bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center cursor-pointer active:scale-95 transition-transform relative overflow-hidden">
-                                <i class="ph-fill ph-whatsapp-logo absolute top-2 right-2 text-green-500 text-lg opacity-50"></i>
-                                <div class="relative mb-2 mt-2">
-                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos&backgroundColor=e2e8f0" class="w-14 h-14 rounded-full border border-slate-200">
-                                    <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
-                                </div>
-                                <h4 class="font-bold text-slate-800 text-sm">Carlos M.</h4>
-                                <p class="text-[10px] text-slate-500 text-center leading-tight">Psicología<br>8vo Semestre</p>
-                                <span class="mt-2 bg-green-50 text-green-600 text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">En línea</span>
-                            </div>
-
-                            <!-- Laura: Abre WhatsApp -->
-                            <div onclick="openWhatsApp('Laura', 'Derecho')" class="snap-start min-w-[130px] bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center cursor-pointer active:scale-95 transition-transform relative overflow-hidden">
-                                <i class="ph-fill ph-whatsapp-logo absolute top-2 right-2 text-green-500 text-lg opacity-50"></i>
-                                <div class="relative mb-2 mt-2">
-                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Laura&backgroundColor=ffdfbf" class="w-14 h-14 rounded-full border border-slate-200">
-                                    <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
-                                </div>
-                                <h4 class="font-bold text-slate-800 text-sm">Laura V.</h4>
-                                <p class="text-[10px] text-slate-500 text-center leading-tight">Derecho<br>9no Semestre</p>
-                                <span class="mt-2 bg-green-50 text-green-600 text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">En línea</span>
-                            </div>
-
-                            <!-- Andrés: Ocupado -->
-                            <div onclick="showModal('Andrés está en clase. Te notificaremos cuando esté disponible para hablar.')" class="snap-start min-w-[130px] bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center cursor-pointer active:scale-95 transition-transform opacity-75">
-                                <div class="relative mb-2 mt-2">
-                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Andres&backgroundColor=c0aede" class="w-14 h-14 rounded-full border border-slate-200 grayscale">
-                                    <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-slate-400 border-2 border-white rounded-full"></div>
-                                </div>
-                                <h4 class="font-bold text-slate-800 text-sm">Andrés P.</h4>
-                                <p class="text-[10px] text-slate-500 text-center leading-tight">Ing. Sistemas<br>7mo Semestre</p>
-                                <span class="mt-2 bg-slate-100 text-slate-500 text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">Ocupado</span>
-                            </div>
-
-                            <!-- Valeria: Abre WhatsApp -->
-                            <div onclick="openWhatsApp('Valeria', 'Diseño Gráfico')" class="snap-start min-w-[130px] bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center cursor-pointer active:scale-95 transition-transform relative overflow-hidden">
-                                <i class="ph-fill ph-whatsapp-logo absolute top-2 right-2 text-green-500 text-lg opacity-50"></i>
-                                <div class="relative mb-2 mt-2">
-                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Valeria&backgroundColor=d1fae5" class="w-14 h-14 rounded-full border border-slate-200">
-                                    <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
-                                </div>
-                                <h4 class="font-bold text-slate-800 text-sm">Valeria G.</h4>
-                                <p class="text-[10px] text-slate-500 text-center leading-tight">Diseño Gráfico<br>6to Semestre</p>
-                                <span class="mt-2 bg-green-50 text-green-600 text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">En línea</span>
-                            </div>
-
-                            <!-- Mateo: Ocupado -->
-                            <div onclick="showModal('Mateo está en su práctica de laboratorio. Intenta más tarde.')" class="snap-start min-w-[130px] bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center cursor-pointer active:scale-95 transition-transform opacity-75">
-                                <div class="relative mb-2 mt-2">
-                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mateo&backgroundColor=fef08a" class="w-14 h-14 rounded-full border border-slate-200 grayscale">
-                                    <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-slate-400 border-2 border-white rounded-full"></div>
-                                </div>
-                                <h4 class="font-bold text-slate-800 text-sm">Mateo R.</h4>
-                                <p class="text-[10px] text-slate-500 text-center leading-tight">Medicina<br>10mo Semestre</p>
-                                <span class="mt-2 bg-slate-100 text-slate-500 text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">Ocupado</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Actividades Areandina (Con Sistema de Reservas) -->
-                    <div class="mt-4 px-6 mb-8">
-                        <div class="flex justify-between items-end mb-4">
-                            <div>
-                                <h3 class="font-bold text-slate-800 text-lg">Eventos y Esparcimiento</h3>
-                                <p class="text-xs text-slate-500">Reserva tu espacio en el campus</p>
-                            </div>
-                            <span class="text-xs text-areandina font-semibold cursor-pointer">Ver calendario</span>
-                        </div>
-                        
-                        <div class="space-y-3">
-                            <!-- Actividad 1: Yoga -->
-                            <div onclick="openActivityModal('Sesión de Yoga', 'Cancha Principal', 'purple', 'ph-person-simple-tai-chi', ['Hoy, 4:00 PM', 'Mañana, 8:00 AM', 'Jueves, 5:00 PM'])" class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-4 cursor-pointer active:scale-[0.98] transition-transform">
-                                <div class="w-16 h-16 rounded-xl bg-purple-100 text-purple-500 flex items-center justify-center flex-shrink-0">
-                                    <i class="ph-fill ph-person-simple-tai-chi text-3xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-bold text-sm text-slate-800">Sesión de Yoga</h4>
-                                    <p class="text-xs text-slate-500 line-clamp-1">Cancha principal</p>
-                                </div>
-                                <button class="px-3 py-1.5 rounded-lg bg-slate-50 text-areandina text-xs font-semibold border border-slate-200">
-                                    Reservar
-                                </button>
-                            </div>
-
-                            <!-- Actividad 2: Rumba -->
-                            <div onclick="openActivityModal('Clase de Rumba Tropical', 'Gimnasio Areandina', 'pink', 'ph-music-notes', ['Hoy, 6:00 PM', 'Viernes, 4:00 PM'])" class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-4 cursor-pointer active:scale-[0.98] transition-transform">
-                                <div class="w-16 h-16 rounded-xl bg-pink-100 text-pink-500 flex items-center justify-center flex-shrink-0">
-                                    <i class="ph-fill ph-music-notes text-3xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-bold text-sm text-slate-800">Rumba Tropical</h4>
-                                    <p class="text-xs text-slate-500 line-clamp-1">Gimnasio Areandina</p>
-                                </div>
-                                <button class="px-3 py-1.5 rounded-lg bg-slate-50 text-areandina text-xs font-semibold border border-slate-200">
-                                    Reservar
-                                </button>
-                            </div>
-
-                            <!-- Actividad 3: Psicología -->
-                            <div onclick="openActivityModal('Taller: Manejo de Ansiedad', 'Auditorio Pablo Oliveros', 'teal', 'ph-brain', ['Miércoles, 10:00 AM', 'Viernes, 2:00 PM'])" class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-4 cursor-pointer active:scale-[0.98] transition-transform">
-                                <div class="w-16 h-16 rounded-xl bg-teal-100 text-teal-500 flex items-center justify-center flex-shrink-0">
-                                    <i class="ph-fill ph-brain text-3xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-bold text-sm text-slate-800">Taller de Ansiedad</h4>
-                                    <p class="text-xs text-slate-500 line-clamp-1">Auditorio Pablo Oliveros</p>
-                                </div>
-                                <button class="px-3 py-1.5 rounded-lg bg-slate-50 text-areandina text-xs font-semibold border border-slate-200">
-                                    Reservar
-                                </button>
-                            </div>
-
-                            <!-- Actividad 4: Ping Pong -->
-                            <div onclick="openActivityModal('Torneo Relámpago Ping Pong', 'Plazoleta Principal', 'blue', 'ph-tennis-ball', ['Jueves, 1:00 PM'])" class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-4 cursor-pointer active:scale-[0.98] transition-transform">
-                                <div class="w-16 h-16 rounded-xl bg-blue-100 text-blue-500 flex items-center justify-center flex-shrink-0">
-                                    <i class="ph-fill ph-tennis-ball text-3xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-bold text-sm text-slate-800">Torneo Ping Pong</h4>
-                                    <p class="text-xs text-slate-500 line-clamp-1">Plazoleta Principal</p>
-                                </div>
-                                <button class="px-3 py-1.5 rounded-lg bg-slate-50 text-areandina text-xs font-semibold border border-slate-200">
-                                    Reservar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- === PESTAÑA 2: RECURSOS === -->
-                <div id="tab-recursos" class="tab-content hidden h-full overflow-y-auto no-scrollbar pb-24 fade-in bg-white">
-                    <header class="pt-12 pb-4 px-6 sticky top-0 bg-white/90 backdrop-blur-md z-10 border-b border-slate-100">
-                        <h2 class="text-2xl font-bold text-slate-800">Recursos</h2>
-                        <p class="text-sm text-slate-500 mt-1">Explora herramientas para tu bienestar</p>
-                        
-                        <!-- Buscador -->
-                        <div class="mt-4 relative">
-                            <i class="ph ph-magnifying-glass absolute left-3 top-3.5 text-slate-400 text-lg"></i>
-                            <input type="text" placeholder="Buscar podcasts, técnicas..." class="w-full bg-slate-100 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-areandina outline-none transition-all">
-                        </div>
-                    </header>
-
-                    <div class="py-4 space-y-8">
-                        
-                        <!-- Categoría 1: Herramientas Interactivas -->
+                <!-- Tab 1: Inicio -->
+                <div id="tab-inicio" class="tab-content p-8 pt-12 space-y-8">
+                    <header class="flex justify-between items-center relative z-10">
                         <div>
-                            <div class="px-6 flex justify-between items-end mb-4">
-                                <h3 class="font-bold text-slate-800 text-lg">Herramientas Activas</h3>
-                            </div>
-                            <div class="flex overflow-x-auto space-x-4 px-6 pb-2 no-scrollbar snap-x">
-                                <!-- Ejercicio de Respiración -->
-                                <div onclick="openBreathingModal()" class="snap-start min-w-[140px] bg-blue-50 border border-blue-100 rounded-2xl p-4 cursor-pointer active:scale-95 transition-transform">
-                                    <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center mb-3">
-                                        <i class="ph-fill ph-wind text-xl"></i>
-                                    </div>
-                                    <h4 class="font-bold text-slate-800 text-sm">Respiración</h4>
-                                    <p class="text-[10px] text-slate-500 mt-1">Técnica 4-7-8</p>
-                                </div>
-                                
-                                <!-- Diario de Gratitud (NUEVO) -->
-                                <div onclick="openJournalModal()" class="snap-start min-w-[140px] bg-emerald-50 border border-emerald-100 rounded-2xl p-4 cursor-pointer active:scale-95 transition-transform">
-                                    <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-500 flex items-center justify-center mb-3">
-                                        <i class="ph-fill ph-notebook text-xl"></i>
-                                    </div>
-                                    <h4 class="font-bold text-slate-800 text-sm">Mi Diario</h4>
-                                    <p class="text-[10px] text-slate-500 mt-1">Escribe lo que sientes</p>
-                                </div>
+                            <p class="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 opacity-80" id="greeting-time">Hola 👋</p>
+                            <h2 class="text-3xl font-extrabold tracking-tighter text-slate-900" id="user-display">SSAENZ19</h2>
+                        </div>
+                        <img class="w-14 h-14 rounded-full border-4 border-white shadow-md object-cover" src="https://i.pravatar.cc/150?img=68" alt="Profile">
+                    </header>
 
-                                <!-- Técnica Pomodoro -->
-                                <div onclick="showModal('Temporizador Pomodoro: Estudia 25 min y descansa 5 min. Próximamente integrado aquí.')" class="snap-start min-w-[140px] bg-amber-50 border border-amber-100 rounded-2xl p-4 cursor-pointer active:scale-95 transition-transform">
-                                    <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-500 flex items-center justify-center mb-3">
-                                        <i class="ph-fill ph-timer text-xl"></i>
-                                    </div>
-                                    <h4 class="font-bold text-slate-800 text-sm">Foco Profundo</h4>
-                                    <p class="text-[10px] text-slate-500 mt-1">Método Pomodoro</p>
-                                </div>
+                    <div class="bg-[#6DBB2D] rounded-[2.5rem] p-8 text-white shadow-lg shadow-green-900/20">
+                        <h3 class="font-bold text-xl leading-snug mb-2 uppercase tracking-tighter italic">"Tu mente es el campus más importante."</h3>
+                        <p class="text-[10px] opacity-90">Sello Humanista Areandino</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-end px-1">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Apoyo en <span id="sede-label">Sede</span></h4>
+                            <span class="text-[9px] text-slate-400 flex items-center gap-1 animate-pulse">Desliza <i class="ph-bold ph-arrow-right"></i></span>
+                        </div>
+                        
+                        <!-- Psicolgos Container (Populated by JS) -->
+                        <div id="psicologos-container" class="flex space-x-3 overflow-x-auto no-scrollbar py-2 snap-x pb-4 px-1 -mx-1">
+                        </div>
+                    </div>
+
+                    <!-- Próxima Actividad -->
+                    <div class="space-y-4 mt-6">
+                        <div class="flex justify-between items-end px-1">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Próxima Actividad</h4>
+                            <button onclick="switchTab('campus')" class="text-[10px] font-bold text-[#6DBB2D] hover:underline">Ver agenda</button>
+                        </div>
+                        <div class="glass p-4 flex items-center space-x-4 border-l-4 border-[#6DBB2D] cursor-pointer shadow-sm relative overflow-hidden active:scale-[0.98] transition-transform" onclick="switchTab('campus'); setTimeout(() => openForm('Rumba Terapia', 'Hoy 4:00 PM • Plazoleta'), 300)">
+                            <div class="absolute -right-4 -top-4 opacity-5"><i class="ph-fill ph-music-notes text-8xl"></i></div>
+                            <div class="w-12 h-12 bg-white/60 rounded-xl flex items-center justify-center text-[#6DBB2D] relative z-10 flex-shrink-0"><i class="ph-fill ph-music-notes text-2xl"></i></div>
+                            <div class="flex-1 relative z-10">
+                                <span class="px-2 py-0.5 bg-green-100 text-green-700 text-[8px] font-bold rounded-full uppercase tracking-wider mb-1 inline-block">Hoy</span>
+                                <h5 class="text-sm font-bold text-slate-900 leading-tight">Rumba Terapia</h5>
+                                <p class="text-[10px] text-slate-500 mt-0.5">4:00 PM • Plazoleta Principal</p>
+                            </div>
+                            <i class="ph-bold ph-arrow-right text-xl text-[#6DBB2D] relative z-10"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Campus -->
+                <div id="tab-campus" class="tab-content hidden p-8 pt-12 space-y-8">
+                    <h2 class="text-3xl font-extrabold tracking-tighter text-slate-900">Mi Campus</h2>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div onclick="openMapModal()" class="col-span-2 relative h-44 rounded-[2.5rem] overflow-hidden shadow-xl active:scale-[0.98] transition-transform bg-[#002D62] cursor-pointer">
+                            <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=800" class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay" alt="Campus bg">
+                            <div class="absolute inset-0 p-6 flex flex-col justify-end">
+                                <h4 class="text-white font-bold text-xl">Directorio Sedes</h4>
+                                <p class="text-white/70 text-xs">Consulta todas las subsedes</p>
                             </div>
                         </div>
-
-                        <!-- Categoría 2: Podcasts y Audios -->
-                        <div class="px-6">
-                            <h3 class="font-bold text-slate-800 text-lg mb-4">Audios y Relajación</h3>
-                            <div class="space-y-3">
-                                <div onclick="openPlayerModal('Sobreviviendo a parciales', 'Podcast Areandino', 'indigo', 'ph-headphones')" class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-4 cursor-pointer active:scale-[0.98] transition-transform">
-                                    <div class="w-12 h-12 rounded-xl bg-indigo-500 text-white flex items-center justify-center flex-shrink-0 shadow-inner">
-                                        <i class="ph-fill ph-headphones text-2xl"></i>
-                                    </div>
-                                    <div class="flex-1">
-                                        <h4 class="font-bold text-sm text-slate-800 line-clamp-1">Sobreviviendo a parciales</h4>
-                                        <p class="text-xs text-slate-500">Podcast • 15 min</p>
-                                    </div>
-                                    <i class="ph-fill ph-play-circle text-2xl text-slate-300"></i>
-                                </div>
-
-                                <div onclick="openPlayerModal('Meditación: Autocompasión', 'Guía de Relajación', 'rose', 'ph-heart')" class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-4 cursor-pointer active:scale-[0.98] transition-transform">
-                                    <div class="w-12 h-12 rounded-xl bg-rose-400 text-white flex items-center justify-center flex-shrink-0 shadow-inner">
-                                        <i class="ph-fill ph-heart text-2xl"></i>
-                                    </div>
-                                    <div class="flex-1">
-                                        <h4 class="font-bold text-sm text-slate-800 line-clamp-1">Autocompasión y Paz</h4>
-                                        <p class="text-xs text-slate-500">Meditación guiada • 10 min</p>
-                                    </div>
-                                    <i class="ph-fill ph-play-circle text-2xl text-slate-300"></i>
-                                </div>
-
-                                <div onclick="openPlayerModal('Sonidos de Lluvia', 'Dormir Mejor', 'cyan', 'ph-cloud-rain')" class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-4 cursor-pointer active:scale-[0.98] transition-transform">
-                                    <div class="w-12 h-12 rounded-xl bg-cyan-600 text-white flex items-center justify-center flex-shrink-0 shadow-inner">
-                                        <i class="ph-fill ph-cloud-rain text-2xl"></i>
-                                    </div>
-                                    <div class="flex-1">
-                                        <h4 class="font-bold text-sm text-slate-800 line-clamp-1">Lluvia para Dormir</h4>
-                                        <p class="text-xs text-slate-500">Ruido Blanco • 45 min</p>
-                                    </div>
-                                    <i class="ph-fill ph-play-circle text-2xl text-slate-300"></i>
-                                </div>
-                            </div>
+                        <div class="glass p-6 flex flex-col justify-between aspect-square cursor-pointer" onclick="openListModal('tutorias')">
+                            <div class="w-12 h-12 bg-blue-500 text-white rounded-xl flex items-center justify-center shadow-lg"><i class="ph-fill ph-student text-2xl"></i></div>
+                            <h4 class="font-bold text-slate-900">Tutorías</h4>
                         </div>
+                        <div class="glass p-6 flex flex-col justify-between aspect-square cursor-pointer" onclick="openListModal('cultura')">
+                            <div class="w-12 h-12 bg-orange-500 text-white rounded-xl flex items-center justify-center shadow-lg"><i class="ph-fill ph-palette text-2xl"></i></div>
+                            <h4 class="font-bold text-slate-900">Cultura</h4>
+                        </div>
+                    </div>
 
-                        <!-- Categoría 3: Lecturas y Artículos -->
-                        <div class="px-6 mb-4">
-                            <h3 class="font-bold text-slate-800 text-lg mb-4">Lecturas Recomendadas</h3>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div onclick="showModal('Lección: Apaga pantallas 30 min antes de dormir y mantén una rutina regular.', 'Artículo', '🌙')" class="bg-slate-50 border border-slate-100 rounded-2xl p-4 cursor-pointer active:scale-95 transition-transform">
-                                    <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center mb-2">
-                                        <i class="ph-fill ph-moon-stars"></i>
-                                    </div>
-                                    <h4 class="font-bold text-slate-800 text-xs">Higiene del Sueño</h4>
-                                    <p class="text-[10px] text-slate-500 mt-1">Lectura de 3 min</p>
-                                </div>
-                                <div onclick="showModal('Tip: Divide las tareas grandes en pequeñas partes para evitar la parálisis por análisis.', 'Artículo', '🔥')" class="bg-slate-50 border border-slate-100 rounded-2xl p-4 cursor-pointer active:scale-95 transition-transform">
-                                    <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center mb-2">
-                                        <i class="ph-fill ph-fire"></i>
-                                    </div>
-                                    <h4 class="font-bold text-slate-800 text-xs">Evitar el Burnout</h4>
-                                    <p class="text-[10px] text-slate-500 mt-1">Lectura de 5 min</p>
-                                </div>
+                    <div class="space-y-4">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Agenda Semanal</h4>
+                        <div class="space-y-3">
+                            <div class="glass p-4 flex items-center space-x-4 border-l-4 border-[#6DBB2D] cursor-pointer" onclick="openForm('Rumba Terapia', 'Hoy 4:00 PM • Plazoleta')">
+                                <div class="w-10 h-10 bg-white/60 rounded-xl flex items-center justify-center text-[#6DBB2D]"><i class="ph-fill ph-music-notes text-xl"></i></div>
+                                <div class="flex-1"><h5 class="text-sm font-bold text-slate-900">Rumba Terapia</h5><p class="text-[10px] text-slate-500">Hoy, 4:00 PM</p></div>
+                                <i class="ph-bold ph-plus-circle text-2xl text-[#6DBB2D]"></i>
+                            </div>
+                            <div class="glass p-4 flex items-center space-x-4 border-l-4 border-blue-400 cursor-pointer" onclick="openForm('Taller Excel', 'Mañana 10:00 AM • Sala B')">
+                                <div class="w-10 h-10 bg-white/60 rounded-xl flex items-center justify-center text-blue-500"><i class="ph-fill ph-laptop text-xl"></i></div>
+                                <div class="flex-1"><h5 class="text-sm font-bold text-slate-900">Excel Avanzado</h5><p class="text-[10px] text-slate-500">Mañana, 10:00 AM</p></div>
+                                <i class="ph-bold ph-plus-circle text-2xl text-blue-500"></i>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- === PESTAÑA 3: PERFIL === -->
-                <div id="tab-perfil" class="tab-content hidden h-full overflow-y-auto no-scrollbar pb-24 fade-in">
-                    <div class="h-32 bg-areandina rounded-b-[2rem] relative">
-                        <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] rounded-b-[2rem]"></div>
+                <!-- Tab 3: Comunidad -->
+                <div id="tab-comunidad" class="tab-content hidden p-8 pt-12 space-y-6">
+                    <h2 class="text-3xl font-extrabold tracking-tighter text-slate-900 mb-2">Comunidad</h2>
+                    
+                    <!-- Trending Topics -->
+                    <div class="flex flex-wrap gap-2 px-1">
+                        <span class="px-3 py-1.5 bg-slate-200/50 text-slate-600 rounded-xl text-[10px] font-bold shadow-sm">#Parciales</span>
+                        <span class="px-3 py-1.5 bg-[#6DBB2D]/20 text-[#4E9A06] rounded-xl text-[10px] font-bold shadow-sm">#RumbaTerapia</span>
+                        <span class="px-3 py-1.5 bg-blue-500/20 text-blue-700 rounded-xl text-[10px] font-bold shadow-sm">#Semilleros</span>
+                    </div>
+
+                    <!-- Estudiantes Online -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-end px-1">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Online en Sede</h4>
+                            <span class="text-[9px] font-bold text-green-500 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> 142 activos</span>
+                        </div>
+                        <div class="flex space-x-3 overflow-x-auto no-scrollbar py-1 px-1 -mx-1">
+                            <div class="relative flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"><img src="https://i.pravatar.cc/150?img=12" class="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover"><div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div></div>
+                            <div class="relative flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"><img src="https://i.pravatar.cc/150?img=25" class="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover"><div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div></div>
+                            <div class="relative flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"><img src="https://i.pravatar.cc/150?img=33" class="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover"><div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div></div>
+                            <div class="relative flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"><img src="https://i.pravatar.cc/150?img=44" class="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover"><div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div></div>
+                            <div class="relative flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"><img src="https://i.pravatar.cc/150?img=55" class="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover"><div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div></div>
+                            <div class="relative flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full border-2 border-dashed border-slate-300 text-slate-400 bg-white/50 text-xs font-bold cursor-pointer">+</div>
+                        </div>
+                    </div>
+
+                    <!-- Clubes de Interés -->
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Clubes de Interés</h4>
+                        <div class="flex space-x-3 overflow-x-auto no-scrollbar py-2 px-1 -mx-1">
+                            <div class="min-w-[90px] glass p-3 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-white/50 transition-colors active:scale-95" onclick="openForm('Club de Gaming', 'Únete al Discord oficial y participa en torneos.')">
+                                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600"><i class="ph-fill ph-game-controller text-xl"></i></div>
+                                <span class="text-[10px] font-bold text-slate-800">Gaming</span>
+                            </div>
+                            <div class="min-w-[90px] glass p-3 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-white/50 transition-colors active:scale-95" onclick="openForm('Club Running', 'Salidas semanales por la ciudad.')">
+                                <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600"><i class="ph-fill ph-sneaker text-xl"></i></div>
+                                <span class="text-[10px] font-bold text-slate-800">Running</span>
+                            </div>
+                            <div class="min-w-[90px] glass p-3 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-white/50 transition-colors active:scale-95" onclick="openForm('Club de Lectura', 'Debates mensuales en la biblioteca.')">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600"><i class="ph-fill ph-book-open text-xl"></i></div>
+                                <span class="text-[10px] font-bold text-slate-800">Lectura</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Destacados Instagram -->
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Destacados @Areandina</h4>
+                        <div class="flex space-x-4 overflow-x-auto no-scrollbar py-2 px-1 -mx-1">
+                            <div class="flex flex-col items-center gap-1 cursor-pointer active:scale-95 transition-transform" onclick="window.open('https://instagram.com/areandina')">
+                                <div class="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 via-rose-500 to-fuchsia-600 shadow-md">
+                                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=150" class="w-full h-full rounded-full border-2 border-white object-cover" alt="Eventos">
+                                </div>
+                                <span class="text-[9px] font-bold text-slate-600">Eventos 🎉</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1 cursor-pointer active:scale-95 transition-transform" onclick="window.open('https://instagram.com/areandina')">
+                                <div class="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 via-rose-500 to-fuchsia-600 shadow-md">
+                                    <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=150" class="w-full h-full rounded-full border-2 border-white object-cover" alt="Comunidad">
+                                </div>
+                                <span class="text-[9px] font-bold text-slate-600">Nosotros 🫂</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1 cursor-pointer active:scale-95 transition-transform" onclick="window.open('https://instagram.com/areandina')">
+                                <div class="w-16 h-16 rounded-full p-[2px] bg-slate-300 shadow-sm">
+                                    <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=150" class="w-full h-full rounded-full border-2 border-white object-cover" alt="Tips">
+                                </div>
+                                <span class="text-[9px] font-bold text-slate-400">Tips 🧠</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Foro Estudiantil Compacto -->
+                    <div class="glass p-5 flex flex-col gap-4 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i class="ph-fill ph-chats-circle text-xl text-[#6DBB2D]"></i>
+                                <h3 class="font-bold text-slate-900 text-sm">Foro Abierto</h3>
+                            </div>
+                            <button class="text-[10px] font-bold text-[#6DBB2D]">Ver más</button>
+                        </div>
+                        <div class="bg-white/70 p-4 rounded-2xl shadow-sm">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <img src="https://i.pravatar.cc/150?img=32" class="w-7 h-7 rounded-full border border-white" alt="Avatar">
+                                <div><h5 class="text-xs font-bold text-slate-800">Mateo R.</h5><p class="text-[8px] text-slate-500">Ingeniería • Hace 5m</p></div>
+                            </div>
+                            <p class="text-xs text-slate-700">¿Alguien para estudiar el examen de cálculo? 📚 Ya estoy en biblioteca.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Perfil -->
+                <div id="tab-perfil" class="tab-content hidden p-8 pt-12 space-y-6 text-center">
+                    <div class="relative w-32 h-32 mx-auto mt-2">
+                        <img class="w-full h-full rounded-[2.5rem] object-cover shadow-xl border-4 border-white" src="https://i.pravatar.cc/150?img=68" alt="Profile pic">
+                        <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-[#6DBB2D] rounded-full border-4 border-white flex items-center justify-center text-white shadow-lg cursor-pointer active:scale-95 transition-transform"><i class="ph-bold ph-pencil-simple"></i></div>
+                    </div>
+                    <h3 class="text-2xl font-extrabold text-slate-900" id="profile-name">Areandino</h3>
+                    
+                    <!-- Sello Humanista Progress -->
+                    <div class="glass p-6 text-left space-y-3 shadow-sm">
+                        <div class="flex justify-between items-end">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1"><i class="ph-fill ph-medal text-[#6DBB2D]"></i> Sello Humanista</h4>
+                            <span class="text-[10px] font-bold text-[#6DBB2D]">75% • Nivel 2</span>
+                        </div>
+                        <div class="w-full h-3 bg-white/60 rounded-full overflow-hidden shadow-inner">
+                            <div class="h-full bg-gradient-to-r from-[#e4f7d3] to-[#6DBB2D] w-3/4 rounded-full relative">
+                                <div class="absolute right-0 top-0 bottom-0 w-4 bg-white/30 blur-[2px] animate-pulse"></div>
+                            </div>
+                        </div>
+                        <p class="text-[9px] text-slate-500 font-medium">Interactúa en foros y asiste a 1 evento más para subir al Nivel Transformador.</p>
+                    </div>
+
+                    <!-- Dashboard de Bienestar -->
+                    <div class="grid grid-cols-2 gap-3 text-left">
+                        <div class="glass p-4 rounded-2xl flex flex-col gap-1 shadow-sm">
+                            <i class="ph-fill ph-smiley text-2xl text-yellow-500"></i>
+                            <span class="text-2xl font-extrabold text-slate-800">3</span>
+                            <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Estados de ánimo</span>
+                        </div>
+                        <div class="glass p-4 rounded-2xl flex flex-col gap-1 shadow-sm">
+                            <i class="ph-fill ph-calendar-check text-2xl text-blue-500"></i>
+                            <span class="text-2xl font-extrabold text-slate-800">1</span>
+                            <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Tutoría agendada</span>
+                        </div>
+                    </div>
+
+                    <!-- Mis Conexiones -->
+                    <div class="glass p-6 text-left space-y-4 shadow-sm">
+                        <div class="flex justify-between items-end">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Mis Conexiones</h4>
+                            <span class="text-[10px] font-bold text-[#6DBB2D]">3 Amigos</span>
+                        </div>
+                        <div class="flex space-x-4 overflow-x-auto no-scrollbar py-1 px-1 -mx-1">
+                            <div class="flex flex-col items-center gap-1 min-w-[50px] cursor-pointer hover:scale-105 transition-transform">
+                                <img src="https://i.pravatar.cc/150?img=12" class="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover">
+                                <span class="text-[10px] font-bold text-slate-700">Ana</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1 min-w-[50px] cursor-pointer hover:scale-105 transition-transform">
+                                <img src="https://i.pravatar.cc/150?img=33" class="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover">
+                                <span class="text-[10px] font-bold text-slate-700">Luis</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1 min-w-[50px] cursor-pointer hover:scale-105 transition-transform">
+                                <img src="https://i.pravatar.cc/150?img=47" class="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover">
+                                <span class="text-[10px] font-bold text-slate-700">Valeria</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1 min-w-[50px] cursor-pointer hover:scale-105 transition-transform">
+                                <div class="w-12 h-12 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 bg-white/50">
+                                    <i class="ph-bold ph-user-plus text-lg"></i>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-400">Añadir</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mis Gustos -->
+                    <div class="glass p-6 text-left space-y-4 shadow-sm">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Mis Intereses</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-4 py-1.5 bg-blue-100 text-blue-700 rounded-full text-[10px] font-bold shadow-sm">💻 Tecnología</span>
+                            <span class="px-4 py-1.5 bg-orange-100 text-orange-700 rounded-full text-[10px] font-bold shadow-sm">🎵 Música</span>
+                            <span class="px-4 py-1.5 border-2 border-dashed border-slate-300 text-slate-400 rounded-full text-[10px] font-bold cursor-pointer hover:bg-slate-50">+ Añadir</span>
+                        </div>
                     </div>
                     
-                    <div class="px-6 relative -mt-12 text-center">
-                        <div class="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center border-4 border-slate-50 shadow-md">
-                            <img id="userAvatarLarge" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Areandina&backgroundColor=e2e8f0" alt="Avatar" class="w-full h-full rounded-full">
-                        </div>
-                        <h2 id="userNameProfile" class="mt-3 text-2xl font-bold text-slate-800">Estudiante</h2>
-                        <p class="text-sm text-slate-500" id="userEmailProfile">usuario@areandina.edu.co</p>
-                    </div>
-
-                    <!-- Sección: Mis Gustos / Intereses -->
-                    <div class="px-6 mt-8">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold text-slate-800 text-lg">Mis Intereses</h3>
-                            <button onclick="openInterestsModal()" class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-300 transition-colors">
-                                <i class="ph-bold ph-plus text-xs"></i>
-                            </button>
-                        </div>
-                        <p class="text-xs text-slate-500 mb-3">Usamos esto para recomendarte actividades y mentores.</p>
-                        
-                        <!-- Contenedor dinámico de intereses -->
-                        <div id="userInterestsContainer" class="flex flex-wrap gap-2">
-                            <!-- Los intereses se inyectarán aquí por JS -->
-                        </div>
-                    </div>
-
-                    <!-- Sección: Haz Amigos / Conoce Gente -->
-                    <div class="px-6 mt-8">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold text-slate-800 text-lg">Conoce Gente</h3>
-                            <span class="text-xs text-areandina font-semibold cursor-pointer" onclick="showModal('Pronto podrás explorar perfiles completos y chatear directamente desde la App.', 'Red de Amigos', '🤝')">Ver más</span>
-                        </div>
-                        <p class="text-xs text-slate-500 mb-3">Estudiantes con gustos similares a los tuyos.</p>
-                        
-                        <div class="flex overflow-x-auto space-x-4 pb-2 no-scrollbar snap-x">
-                            <!-- Perfil Recomendado 1 -->
-                            <div onclick="showModal('Solicitud de conexión enviada a Camila. ¡Te avisaremos cuando acepte!', '¡Conexión iniciada!', '✨')" class="snap-start min-w-[130px] bg-white border border-slate-100 rounded-2xl p-4 shadow-sm flex flex-col items-center text-center cursor-pointer active:scale-95 transition-transform relative">
-                                <div class="absolute top-2 right-2 bg-indigo-100 text-indigo-600 text-[8px] font-bold px-1.5 py-0.5 rounded-md">85% Match</div>
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Camila&backgroundColor=e0e7ff" class="w-14 h-14 rounded-full mb-2 border border-slate-200 mt-2">
-                                <h4 class="font-bold text-xs text-slate-800">Camila S.</h4>
-                                <p class="text-[9px] text-slate-500 mb-2">Com. Social • 5to Sem.</p>
-                                <div class="flex space-x-1 mb-3 text-sm">
-                                    <span title="Música">🎵</span>
-                                    <span title="Arte">🎨</span>
-                                </div>
-                                <button class="w-full bg-slate-50 hover:bg-areandina hover:text-white text-slate-600 border border-slate-200 text-[10px] font-semibold py-1.5 rounded-lg transition-colors">Conectar</button>
-                            </div>
-
-                            <!-- Perfil Recomendado 2 -->
-                            <div onclick="showModal('Solicitud de conexión enviada a Juan. ¡Te avisaremos cuando acepte!', '¡Conexión iniciada!', '✨')" class="snap-start min-w-[130px] bg-white border border-slate-100 rounded-2xl p-4 shadow-sm flex flex-col items-center text-center cursor-pointer active:scale-95 transition-transform relative">
-                                <div class="absolute top-2 right-2 bg-indigo-100 text-indigo-600 text-[8px] font-bold px-1.5 py-0.5 rounded-md">70% Match</div>
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=JuanJose&backgroundColor=ffedd5" class="w-14 h-14 rounded-full mb-2 border border-slate-200 mt-2">
-                                <h4 class="font-bold text-xs text-slate-800">Juan J.</h4>
-                                <p class="text-[9px] text-slate-500 mb-2">Diseño Gráfico • 3er Sem.</p>
-                                <div class="flex space-x-1 mb-3 text-sm">
-                                    <span title="Arte">🎨</span>
-                                    <span title="Cine">🍿</span>
-                                </div>
-                                <button class="w-full bg-slate-50 hover:bg-areandina hover:text-white text-slate-600 border border-slate-200 text-[10px] font-semibold py-1.5 rounded-lg transition-colors">Conectar</button>
-                            </div>
-                            
-                            <!-- Perfil Recomendado 3 -->
-                            <div onclick="showModal('Solicitud de conexión enviada a Diego. ¡Te avisaremos cuando acepte!', '¡Conexión iniciada!', '✨')" class="snap-start min-w-[130px] bg-white border border-slate-100 rounded-2xl p-4 shadow-sm flex flex-col items-center text-center cursor-pointer active:scale-95 transition-transform relative">
-                                <div class="absolute top-2 right-2 bg-indigo-100 text-indigo-600 text-[8px] font-bold px-1.5 py-0.5 rounded-md">60% Match</div>
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Diego&backgroundColor=dcfce3" class="w-14 h-14 rounded-full mb-2 border border-slate-200 mt-2">
-                                <h4 class="font-bold text-xs text-slate-800">Diego F.</h4>
-                                <p class="text-[9px] text-slate-500 mb-2">Ing. Sistemas • 8vo Sem.</p>
-                                <div class="flex space-x-1 mb-3 text-sm">
-                                    <span title="Tecnología">💻</span>
-                                    <span title="Música">🎵</span>
-                                </div>
-                                <button class="w-full bg-slate-50 hover:bg-areandina hover:text-white text-slate-600 border border-slate-200 text-[10px] font-semibold py-1.5 rounded-lg transition-colors">Conectar</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Ajustes -->
-                    <div class="px-6 mt-8 mb-6">
-                        <h3 class="font-bold text-slate-800 text-lg mb-4">Ajustes</h3>
-                        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                            <div onclick="location.reload()" class="p-4 flex items-center justify-between cursor-pointer active:bg-rose-50 group">
-                                <div class="flex items-center space-x-3 text-rose-500">
-                                    <i class="ph ph-sign-out text-lg"></i>
-                                    <span class="text-sm font-medium">Cerrar Sesión</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <button onclick="location.reload()" class="w-full py-4 rounded-2xl bg-rose-50 text-rose-500 text-xs font-bold uppercase tracking-widest active:scale-95 transition-all shadow-sm">Cerrar Sesión</button>
                 </div>
 
             </div>
 
-            <!-- Menú Inferior -->
-            <nav class="absolute bottom-0 w-full bg-white border-t border-slate-200 px-6 py-4 flex justify-between items-center z-20 pb-8 sm:pb-4 rounded-b-[2.5rem]">
-                <button id="nav-inicio" onclick="switchTab('inicio')" class="nav-btn flex flex-col items-center text-areandina transition-colors space-y-1">
-                    <i class="ph-fill ph-house text-2xl"></i>
-                    <span class="text-[10px] font-semibold">Inicio</span>
-                </button>
-                <button id="nav-recursos" onclick="switchTab('recursos')" class="nav-btn flex flex-col items-center text-slate-400 hover:text-areandina transition-colors space-y-1">
-                    <i class="ph-fill ph-books text-2xl"></i>
-                    <span class="text-[10px] font-medium">Recursos</span>
-                </button>
-                <button id="nav-perfil" onclick="switchTab('perfil')" class="nav-btn flex flex-col items-center text-slate-400 hover:text-areandina transition-colors space-y-1">
-                    <i class="ph-fill ph-user text-2xl"></i>
-                    <span class="text-[10px] font-medium">Perfil</span>
-                </button>
+            <!-- Bottom Navigation -->
+            <nav class="absolute bottom-0 w-full bg-white/80 backdrop-blur-2xl border-t border-white/50 px-2 py-5 flex justify-around items-center z-[100] shadow-2xl">
+                <button onclick="switchTab('inicio')" id="nav-inicio" class="flex-1 flex justify-center text-slate-400 active-nav"><i class="ph-fill ph-house text-3xl"></i></button>
+                <button onclick="switchTab('campus')" id="nav-campus" class="flex-1 flex justify-center text-slate-400"><i class="ph-fill ph-compass text-3xl"></i></button>
+                <button onclick="switchTab('comunidad')" id="nav-comunidad" class="flex-1 flex justify-center text-slate-400"><i class="ph-fill ph-users text-3xl"></i></button>
+                <button onclick="switchTab('perfil')" id="nav-perfil" class="flex-1 flex justify-center text-slate-400"><i class="ph-fill ph-user text-3xl"></i></button>
             </nav>
         </div>
     </div>
 
-    <!-- ================= NOTIFICACIÓN TOAST (MENSAJES MOTIVACIONALES) ================= -->
-    <div id="toast-notification" class="absolute top-12 left-1/2 transform -translate-x-1/2 -translate-y-[150%] opacity-0 transition-all duration-500 z-[200] w-11/12 max-w-sm pointer-events-none">
-        <div class="glass-card bg-white/90 border-l-4 border-l-amber-400 p-3 shadow-lg flex items-center space-x-3">
-            <div id="toast-icon" class="text-2xl">✨</div>
-            <p id="toast-message" class="text-sm font-medium text-slate-700">Mensaje motivacional</p>
-        </div>
-    </div>
-
-    <!-- ================= MODALES DINÁMICOS ================= -->
-
-    <!-- Modal Base (Mensajes simples) -->
-    <div id="custom-modal" class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-slate-900/40" onclick="closeModals()"></div>
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm relative z-10 shadow-2xl text-center">
-            <div id="modal-icon" class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4 text-3xl">ℹ️</div>
-            <h3 id="modal-title" class="text-lg font-bold text-slate-800 mb-2">Título</h3>
-            <p id="modal-message" class="text-sm text-slate-600 mb-6">Mensaje</p>
-            <button onclick="closeModals()" class="w-full bg-slate-800 text-white font-semibold rounded-xl py-3 active:scale-95 transition-transform">Entendido</button>
-        </div>
-    </div>
-
-    <!-- Modal Reservas Actividades -->
-    <div id="activity-modal" class="modal-overlay fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-4">
-        <div class="absolute inset-0 bg-slate-900/40" onclick="closeModals()"></div>
-        <div class="bg-white w-full sm:w-[360px] rounded-t-3xl sm:rounded-3xl p-6 relative z-10 shadow-2xl transform transition-transform duration-300 translate-y-0">
-            <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6 sm:hidden"></div>
-            
-            <div class="flex items-center space-x-4 mb-6">
-                <div id="act-modal-icon-bg" class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <i id="act-modal-icon" class="text-3xl"></i>
-                </div>
+    <!-- Map Modal -->
+    <div id="map-modal" class="modal-overlay fixed inset-0 flex items-end justify-center sm:items-center p-0 sm:p-6 z-[300]" style="display:none;">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModals()"></div>
+        <div class="bg-white w-full sm:w-[400px] h-[85vh] rounded-t-[3rem] relative z-10 flex flex-col overflow-hidden shadow-2xl">
+            <div class="p-8 pb-4 flex justify-between items-start border-b border-slate-50">
                 <div>
-                    <h3 id="act-modal-title" class="font-bold text-xl text-slate-800 leading-tight">Título Actividad</h3>
-                    <p id="act-modal-location" class="text-sm text-slate-500 flex items-center mt-1"><i class="ph-fill ph-map-pin mr-1"></i> Ubicación</p>
+                    <h3 class="font-extrabold text-[#002D62] text-2xl tracking-tight">Sedes <span id="map-city-label"></span></h3>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ubicación Interactiva</p>
                 </div>
+                <button onclick="closeModals()" class="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
             </div>
-            
-            <p class="text-sm text-slate-600 mb-4">Selecciona un horario disponible para reservar tu cupo. Te enviaremos un recordatorio.</p>
-            
-            <div id="act-modal-dates" class="space-y-2 mb-6">
-                <!-- Se inyectan fechas aquí -->
+            <div class="h-44 bg-slate-200">
+                <iframe id="map-iframe" class="w-full h-full border-0" src="" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             </div>
-
-            <button onclick="confirmBooking()" class="w-full bg-areandina text-white font-semibold rounded-xl py-3.5 shadow-lg shadow-green-900/20 active:scale-95 transition-transform">
-                Confirmar Reserva
-            </button>
+            <div class="flex-1 p-6 overflow-y-auto no-scrollbar bg-slate-50">
+                <div id="buildings-list" class="space-y-4 pb-10"></div>
+            </div>
         </div>
     </div>
 
-    <!-- Modal Reproductor Multimedia -->
-    <div id="player-modal" class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <!-- Dynamic List Modal (Tutorías / Cultura) -->
+    <div id="list-modal" class="modal-overlay fixed inset-0 flex items-end justify-center sm:items-center p-0 sm:p-6 z-[300]" style="display:none;">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModals()"></div>
-        <div class="bg-white rounded-3xl p-6 w-full max-w-sm relative z-10 shadow-2xl text-center">
-            <button onclick="closeModals()" class="absolute top-4 right-4 w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200">
-                <i class="ph-bold ph-x"></i>
-            </button>
-            
-            <div id="player-cover" class="w-32 h-32 mx-auto rounded-2xl flex items-center justify-center mb-6 shadow-inner border-4 border-white shadow-lg">
-                <i id="player-icon" class="text-5xl text-white"></i>
-            </div>
-            
-            <h3 id="player-title" class="font-bold text-xl text-slate-800">Título Audio</h3>
-            <p id="player-subtitle" class="text-sm text-slate-500 mb-6">Subtítulo</p>
-            
-            <!-- Barra de Progreso -->
-            <div class="w-full bg-slate-100 h-2 rounded-full mb-2 overflow-hidden">
-                <div id="player-progress" class="bg-indigo-500 h-full w-0 progress-bar-fill"></div>
-            </div>
-            <div class="flex justify-between text-[10px] text-slate-400 font-medium mb-6">
-                <span id="player-time-current">0:00</span>
-                <span>15:00</span>
-            </div>
-
-            <!-- Controles -->
-            <div class="flex items-center justify-center space-x-6">
-                <button class="text-slate-400 text-2xl active:scale-90 transition-transform"><i class="ph-fill ph-rewind-circle"></i></button>
-                <button onclick="togglePlay()" class="w-16 h-16 rounded-full bg-indigo-600 text-white flex items-center justify-center text-3xl shadow-lg shadow-indigo-600/30 active:scale-90 transition-transform">
-                    <i id="player-play-btn" class="ph-fill ph-play ml-1"></i>
-                </button>
-                <button class="text-slate-400 text-2xl active:scale-90 transition-transform"><i class="ph-fill ph-fast-forward-circle"></i></button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Ejercicio Respiración -->
-    <div id="breathing-modal" class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-slate-900/90" onclick="stopBreathing()"></div>
-        <div class="relative z-10 flex flex-col items-center justify-center text-center w-full h-full">
-            <button onclick="stopBreathing()" class="absolute top-6 right-6 text-white/50 hover:text-white text-3xl">
-                <i class="ph-bold ph-x"></i>
-            </button>
-            
-            <h2 class="text-white text-2xl font-bold mb-12">Respira Conmigo</h2>
-            
-            <div class="relative w-64 h-64 flex items-center justify-center mb-12">
-                <!-- Círculo animado -->
-                <div id="breathe-circle" class="absolute w-40 h-40 bg-blue-500/20 rounded-full border-4 border-blue-400"></div>
-                <!-- Texto Central -->
-                <h3 id="breathe-text" class="text-white font-bold text-3xl z-10">Prepárate</h3>
-            </div>
-            
-            <p class="text-blue-200/70 text-sm max-w-xs">Sigue el ritmo del círculo para relajar tu sistema nervioso.</p>
-        </div>
-    </div>
-
-    <!-- Modal Editar Intereses -->
-    <div id="interests-modal" class="modal-overlay fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-4">
-        <div class="absolute inset-0 bg-slate-900/40" onclick="closeModals()"></div>
-        <div class="bg-white w-full sm:w-[360px] rounded-t-3xl sm:rounded-3xl p-6 relative z-10 shadow-2xl">
-            <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6 sm:hidden"></div>
-            
-            <h3 class="font-bold text-xl text-slate-800 mb-1">Tus Intereses</h3>
-            <p class="text-sm text-slate-500 mb-6">Selecciona los temas que te gustan para personalizar tu experiencia.</p>
-            
-            <div id="interests-grid" class="flex flex-wrap gap-2 mb-6">
-                <!-- Etiquetas inyectadas por JS -->
-            </div>
-
-            <button onclick="saveInterests()" class="w-full bg-slate-800 text-white font-semibold rounded-xl py-3.5 shadow-lg active:scale-95 transition-transform">
-                Guardar Cambios
-            </button>
-        </div>
-    </div>
-
-    <!-- Modal Acción Proactiva (Abrumado) -->
-    <div id="urgent-modal" class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModals()"></div>
-        <div class="bg-white rounded-3xl p-6 w-full max-w-sm relative z-10 shadow-2xl text-center">
-            <button onclick="closeModals()" class="absolute top-4 right-4 w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200">
-                <i class="ph-bold ph-x"></i>
-            </button>
-            
-            <div class="w-20 h-20 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-4 text-rose-500 shadow-inner">
-                <i class="ph-fill ph-hands-clapping text-4xl"></i>
-            </div>
-            
-            <h3 class="text-xl font-bold text-slate-800 mb-2">No tienes que estar solo</h3>
-            <p class="text-sm text-slate-600 mb-6">Sabemos que puede ser un momento difícil. Hablar con alguien de confianza o un profesional puede aliviar la carga ahora mismo.</p>
-            
-            <div class="space-y-3">
-                <button onclick="openWhatsApp('Carlos', 'Psicología')" class="w-full bg-green-500 text-white font-semibold rounded-xl py-3.5 flex items-center justify-center space-x-2 active:scale-95 transition-transform shadow-lg shadow-green-500/30">
-                    <i class="ph-fill ph-whatsapp-logo text-xl"></i>
-                    <span>Chatear con un Mentor</span>
-                </button>
-                <button onclick="showSosModal()" class="w-full bg-rose-50 border border-rose-200 text-rose-700 font-semibold rounded-xl py-3.5 flex items-center justify-center space-x-2 active:scale-95 transition-transform">
-                    <i class="ph-fill ph-phone text-xl"></i>
-                    <span>Llamar a Línea de Crisis</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Diario de Gratitud (NUEVO) -->
-    <div id="journal-modal" class="modal-overlay fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-4">
-        <div class="absolute inset-0 bg-slate-900/40" onclick="closeModals()"></div>
-        <div class="bg-emerald-50 w-full sm:w-[360px] rounded-t-3xl sm:rounded-3xl p-6 relative z-10 shadow-2xl">
-            <div class="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-6 sm:hidden"></div>
-            
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center space-x-2">
-                    <i class="ph-fill ph-notebook text-2xl text-emerald-600"></i>
-                    <h3 class="font-bold text-xl text-emerald-900">Diario de Hoy</h3>
+        <div class="bg-white w-full sm:w-[400px] h-[75vh] rounded-t-[3rem] relative z-10 flex flex-col overflow-hidden shadow-2xl">
+            <div class="p-8 pb-4 flex justify-between items-start border-b border-slate-50">
+                <div>
+                    <h3 class="font-extrabold text-[#002D62] text-2xl tracking-tight" id="list-modal-title">Título</h3>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" id="list-modal-desc">Descripción</p>
                 </div>
-                <button onclick="closeModals()" class="text-emerald-700/50 hover:text-emerald-700"><i class="ph-bold ph-x text-xl"></i></button>
+                <button onclick="closeModals()" class="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
             </div>
-            
-            <p class="text-sm text-emerald-800/80 mb-4">Escribir lo que sientes o por lo que estás agradecido ayuda a reducir la ansiedad.</p>
-            
-            <textarea id="journal-text" rows="5" class="w-full bg-white border border-emerald-200 rounded-xl p-4 text-sm text-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none transition-all resize-none mb-4 shadow-sm" placeholder="Hoy me siento..."></textarea>
+            <div class="flex-1 p-6 overflow-y-auto no-scrollbar bg-slate-50">
+                <div id="dynamic-list-container" class="space-y-4 pb-10"></div>
+            </div>
+        </div>
+    </div>
 
-            <button onclick="saveJournal()" class="w-full bg-emerald-600 text-white font-semibold rounded-xl py-3.5 shadow-lg shadow-emerald-900/20 active:scale-95 transition-transform">
-                Guardar Reflexión
-            </button>
+    <!-- General Form Modal -->
+    <div id="form-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-8 z-[400]" style="display:none;">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModals()"></div>
+        <div class="bg-white w-full max-w-sm rounded-[3rem] p-10 shadow-2xl relative text-center">
+            <h2 class="text-2xl font-bold mb-2 text-slate-900" id="form-title">Inscripción</h2>
+            <p id="form-desc" class="text-xs text-slate-500 mb-8"></p>
+            <form onsubmit="confirmForm(event)" class="space-y-4">
+                <input type="email" id="form-email" disabled class="w-full bg-slate-100 rounded-xl py-4 px-5 text-xs text-slate-400 font-bold border-none">
+                <select class="w-full bg-white border border-slate-200 rounded-xl py-4 px-5 text-xs text-slate-800">
+                    <option>Alertarme 30 min antes</option>
+                    <option>Sin recordatorio</option>
+                </select>
+                <button type="submit" class="w-full bg-[#6DBB2D] text-white font-bold rounded-xl py-4 active:scale-95 transition-all shadow-lg">Confirmar Registro</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-10 left-1/2 transform -translate-x-1/2 bg-[#002D62] text-white px-8 py-5 rounded-2xl shadow-2xl z-[500] transition-all duration-300 opacity-0 -translate-y-10 pointer-events-none flex items-center space-x-3">
+        <i class="ph-fill ph-check-circle text-green-400 text-3xl"></i>
+        <div class="flex flex-col">
+            <span class="text-xs font-bold leading-none">¡Registro Exitoso!</span>
+            <span class="text-[9px] opacity-70 mt-1">Revisa tu correo Areandina</span>
         </div>
     </div>
 
     <script>
-        // === DATOS Y ESTADO GLOBAL ===
-        let currentUserName = "Estudiante";
-        
-        // Estado de Intereses
-        const allInterests = [
-            { id: 'musica', label: '🎵 Música', color: 'blue' },
-            { id: 'literatura', label: '📚 Literatura', color: 'indigo' },
-            { id: 'mindfulness', label: '🧘‍♀️ Mindfulness', color: 'teal' },
-            { id: 'arte', label: '🎨 Arte', color: 'orange' },
-            { id: 'deportes', label: '⚽ Deportes', color: 'green' },
-            { id: 'tecnologia', label: '💻 Tecnología', color: 'slate' },
-            { id: 'cine', label: '🍿 Cine', color: 'rose' }
-        ];
-        let userInterests = ['musica', 'literatura', 'mindfulness', 'arte'];
+        // Data Base for the Campuses
+        const database = {
+            "Bogotá": {
+                edificios: [
+                    { n: "Sede Principal Andina", d: "Carrera 14A #70A-34", q: "Carrera+14A+%2370A-34,+Bogot%C3%A1" },
+                    { n: "Sede Administrativa", d: "Calle 71 #13-21", q: "Calle+71+%2313-21,+Bogot%C3%A1" },
+                    { n: "Educación Continuada", d: "Calle 70 #12-35", q: "Calle+70+%2312-35,+Bogot%C3%A1" },
+                    { n: "Sede Radiología", d: "Carrera 14A #68-95", q: "Carrera+14A+%2368-95,+Bogot%C3%A1" },
+                    { n: "Sede 104", d: "Carrera 14A #68-99", q: "Carrera+14A+%2368-99,+Bogot%C3%A1" },
+                    { n: "Edif. Ciencias Sociales", d: "Calle 71 #14-72", q: "Calle+71+%2314-72,+Bogot%C3%A1" },
+                    { n: "Edif. Posgrados", d: "Carrera 14A #70A-31", q: "Carrera+14A+%2370A-31,+Bogot%C3%A1" },
+                    { n: "Sede Estética", d: "Carrera 12 #71-62", q: "Carrera+12+%2371-62,+Bogot%C3%A1" },
+                    { n: "Administrativa II", d: "Calle 71 #11-14", q: "Calle+71+%2311-14,+Bogot%C3%A1" },
+                    { n: "CSU Kennedy", d: "Calle 40 Sur #73D-40", q: "Calle+40+Sur+%2373D-40,+Bogot%C3%A1" },
+                    { n: "CSU Suba", d: "Carrera 94A #145-20", q: "Carrera+94A+%23145-20,+Bogot%C3%A1" }
+                ]
+            },
+            "Pereira": { edificios: [{ n: "Sede Pereira", d: "Calle 24 #8-55", q: "Calle+24+%238-55,+Pereira" }] },
+            "Valledupar": { edificios: [{ n: "Sede Valledupar", d: "Transversal 22 Bis #4-105", q: "Transversal+22+Bis+%234-105,+Valledupar" }] }
+        };
 
-        // === INICIALIZACIÓN ===
+        let currentCity = "Bogotá";
+
+        // Initialize Psychologists List via JS (Removed inline document.write)
+        function loadPsychologists() {
+            const psis = [
+                {n:'Dr. Carlos M.', r:'Psicología', i:11}, {n:'Dra. Laura C.', r:'Salud Mental', i:5},
+                {n:'Dr. Andrés G.', r:'Bienestar', i:33}, {n:'Dra. Sofía R.', r:'Crisis', i:44},
+                {n:'Dr. Mateo P.', r:'Orientador', i:59}, {n:'Dra. Valeria T.', r:'Psicóloga', i:49},
+                {n:'Dr. Felipe M.', r:'Desarrollo', i:12}
+            ];
+            
+            const container = document.getElementById('psicologos-container');
+            let htmlContent = '';
+            
+            psis.forEach(p => {
+                htmlContent += `
+                    <div class="w-[125px] flex-shrink-0 snap-start glass p-4 flex flex-col items-center text-center space-y-2 cursor-pointer hover:bg-white/50 transition-colors">
+                        <img src="https://i.pravatar.cc/150?img=${p.i}" alt="${p.n}" class="w-14 h-14 rounded-2xl border-2 border-white shadow-sm object-cover">
+                        <div>
+                            <h5 class="text-[11px] font-bold text-slate-900 leading-tight">${p.n}</h5>
+                            <p class="text-[9px] font-bold text-[#6DBB2D] uppercase mt-0.5">${p.r}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = htmlContent;
+        }
+
         function handleLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('emailInput').value;
-            let name = email.split('@')[0];
-            currentUserName = name.charAt(0).toUpperCase() + name.slice(1);
+            const email = document.getElementById('email-input').value;
+            currentCity = document.getElementById('sede-input').value;
             
-            document.getElementById('userNameDisplay').innerText = currentUserName;
-            document.getElementById('userNameProfile').innerText = currentUserName;
-            document.getElementById('userEmailProfile').innerText = email;
+            const username = email.split('@')[0].toUpperCase();
+            document.getElementById('user-display').innerText = username;
+            document.getElementById('profile-name').innerText = username;
+            document.getElementById('form-email').value = email;
+            document.getElementById('sede-label').innerText = currentCity;
             
-            const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUserName}&backgroundColor=e2e8f0`;
-            document.getElementById('userAvatarSmall').src = avatarUrl;
-            document.getElementById('userAvatarLarge').src = avatarUrl;
-            
-            document.getElementById('view-login').classList.add('hidden');
-            document.getElementById('view-main').classList.remove('hidden');
-            document.getElementById('view-main').classList.add('flex');
-            
-            renderProfileInterests();
-        }
-
-        // === NAVEGACIÓN ===
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('text-areandina');
-                btn.classList.add('text-slate-400');
-                btn.querySelector('span').classList.remove('font-semibold');
-                btn.querySelector('span').classList.add('font-medium');
-            });
-            
-            const activeBtn = document.getElementById(`nav-${tabId}`);
-            activeBtn.classList.remove('text-slate-400');
-            activeBtn.classList.add('text-areandina');
-            activeBtn.querySelector('span').classList.remove('font-medium');
-            activeBtn.querySelector('span').classList.add('font-semibold');
-        }
-
-        // === CONTROL DE MODALES ===
-        function closeModals() {
-            document.querySelectorAll('.modal-overlay').forEach(modal => {
-                modal.style.display = 'none';
-            });
-            // Resetear cosas al cerrar
-            clearInterval(playerInterval);
-            isPlaying = false;
-        }
-
-        function showModal(message, title = "Información", icon = "ℹ️") {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-message').innerText = message;
-            document.getElementById('modal-icon').innerText = icon;
-            document.getElementById('custom-modal').style.display = 'flex';
-        }
-
-        // === FUNCIONES DINÁMICAS: MENTORES ===
-        function openWhatsApp(mentorName, career) {
-            // Generamos un link real de WhatsApp con un mensaje prellenado
-            const phone = "573227969368"; // Número actualizado para todos los mentores
-            const text = encodeURIComponent(`Hola ${mentorName}, soy ${currentUserName}, estudiante de la Areandina. Vi tu perfil de mentor en la App de Bienestar y quisiera conversar un rato. ¿Tienes disponibilidad?`);
-            window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
-        }
-
-        // === FUNCIONES DINÁMICAS: RESERVAS ACTIVIDADES ===
-        let selectedDateElement = null;
-        function openActivityModal(title, location, colorClass, iconClass, dates) {
-            document.getElementById('act-modal-title').innerText = title;
-            document.getElementById('act-modal-location').innerHTML = `<i class="ph-fill ph-map-pin mr-1"></i> ${location}`;
-            
-            const iconBg = document.getElementById('act-modal-icon-bg');
-            const icon = document.getElementById('act-modal-icon');
-            iconBg.className = `w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 bg-${colorClass}-100 text-${colorClass}-500`;
-            icon.className = `ph-fill ${iconClass} text-3xl`;
-
-            const datesContainer = document.getElementById('act-modal-dates');
-            datesContainer.innerHTML = ''; // Limpiar anteriores
-            
-            dates.forEach((date, index) => {
-                const btn = document.createElement('div');
-                // Estilo inicial deseleccionado
-                btn.className = 'p-3 rounded-xl border-2 border-slate-100 flex justify-between items-center cursor-pointer transition-colors';
-                btn.innerHTML = `<span class="text-sm font-medium text-slate-700">${date}</span> <div class="w-5 h-5 rounded-full border-2 border-slate-300 check-circle"></div>`;
-                
-                btn.onclick = () => {
-                    // Resetear todos
-                    Array.from(datesContainer.children).forEach(child => {
-                        child.classList.remove('border-areandina', 'bg-areandina-light');
-                        child.classList.add('border-slate-100');
-                        child.querySelector('.check-circle').classList.remove('bg-areandina', 'border-areandina');
-                        child.querySelector('.check-circle').classList.add('border-slate-300');
-                    });
-                    // Marcar seleccionado
-                    btn.classList.add('border-areandina', 'bg-areandina-light');
-                    btn.classList.remove('border-slate-100');
-                    btn.querySelector('.check-circle').classList.add('bg-areandina', 'border-areandina');
-                    btn.querySelector('.check-circle').classList.remove('border-slate-300');
-                    selectedDateElement = date;
-                };
-                
-                // Autoseleccionar el primero
-                if(index === 0) btn.onclick();
-                
-                datesContainer.appendChild(btn);
-            });
-
-            document.getElementById('activity-modal').style.display = 'flex';
-        }
-
-        function confirmBooking() {
-            closeModals();
-            showModal(`¡Reserva confirmada para ${selectedDateElement}! Te hemos enviado los detalles a tu correo institucional.`, "¡Todo Listo!", "✅");
-        }
-
-        // === FUNCIONES DINÁMICAS: REPRODUCTOR MULTIMEDIA ===
-        let playerInterval;
-        let isPlaying = false;
-        let currentProgress = 0;
-
-        function openPlayerModal(title, subtitle, colorClass, iconClass) {
-            document.getElementById('player-title').innerText = title;
-            document.getElementById('player-subtitle').innerText = subtitle;
-            
-            const cover = document.getElementById('player-cover');
-            cover.className = `w-32 h-32 mx-auto rounded-2xl flex items-center justify-center mb-6 shadow-inner border-4 border-white shadow-lg bg-${colorClass}-500`;
-            document.getElementById('player-icon').className = `ph-fill ${iconClass} text-5xl text-white`;
-
-            // Reset player
-            currentProgress = 0;
-            document.getElementById('player-progress').style.width = '0%';
-            document.getElementById('player-time-current').innerText = '0:00';
-            document.getElementById('player-play-btn').className = 'ph-fill ph-play ml-1';
-            isPlaying = false;
-
-            document.getElementById('player-modal').style.display = 'flex';
-        }
-
-        function togglePlay() {
-            const playBtn = document.getElementById('player-play-btn');
-            const progressBar = document.getElementById('player-progress');
-            const timeText = document.getElementById('player-time-current');
-            
-            if (isPlaying) {
-                // Pausar
-                clearInterval(playerInterval);
-                playBtn.className = 'ph-fill ph-play ml-1';
-                isPlaying = false;
-            } else {
-                // Reproducir (simulación)
-                playBtn.className = 'ph-fill ph-pause';
-                isPlaying = true;
-                
-                playerInterval = setInterval(() => {
-                    currentProgress += 1;
-                    if (currentProgress > 100) currentProgress = 100;
-                    progressBar.style.width = `${currentProgress}%`;
-                    
-                    // Simular avance de tiempo (15 min = 900 seg, avanzamos rápido para demo)
-                    let simulatedSeconds = Math.floor((currentProgress / 100) * 900);
-                    let mins = Math.floor(simulatedSeconds / 60);
-                    let secs = simulatedSeconds % 60;
-                    timeText.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-
-                    if(currentProgress === 100) togglePlay(); // Auto pausa al final
-                }, 1000); // Actualiza cada segundo
-            }
-        }
-
-        // === FUNCIONES DINÁMICAS: RESPIRACIÓN ===
-        let breathingTimeout1, breathingTimeout2, breathingTimeout3;
-
-        function openBreathingModal() {
-            document.getElementById('breathing-modal').style.display = 'flex';
-            document.getElementById('breathe-text').innerText = "Prepárate...";
-            document.getElementById('breathe-circle').classList.remove('animate-breathing');
-            
-            // Iniciar ciclo después de 2 segundos
+            // Transitions
+            document.getElementById('view-login').style.opacity = '0';
             setTimeout(() => {
-                document.getElementById('breathe-circle').classList.add('animate-breathing');
-                runBreathingCycle();
-            }, 2000);
+                document.getElementById('view-login').classList.add('hidden');
+                document.getElementById('view-main').classList.remove('hidden');
+                setTimeout(() => document.getElementById('view-main').classList.add('opacity-100'), 50);
+            }, 500);
         }
 
-        function runBreathingCycle() {
-            const textEl = document.getElementById('breathe-text');
-            
-            function cycle() {
-                if(document.getElementById('breathing-modal').style.display === 'none') return;
-                
-                textEl.innerText = "Inhala...";
-                breathingTimeout1 = setTimeout(() => {
-                    if(document.getElementById('breathing-modal').style.display === 'none') return;
-                    textEl.innerText = "Sostén...";
-                    
-                    breathingTimeout2 = setTimeout(() => {
-                        if(document.getElementById('breathing-modal').style.display === 'none') return;
-                        textEl.innerText = "Exhala...";
-                        
-                        breathingTimeout3 = setTimeout(cycle, 6000); // Exhala dura 6s
-                    }, 4000); // Sostén dura 4s
-                }, 4000); // Inhala dura 4s
+        function updateTimeCycle() {
+            const h = new Date().getHours();
+            const b = document.getElementById('body-theme');
+            if (h >= 6 && h < 16) {
+                b.className = "theme-am";
+            } else if (h >= 16 && h < 19) {
+                b.className = "theme-sunset";
+            } else { 
+                b.className = "theme-pm"; 
+                createStars(); 
             }
-            cycle();
+            
+            // Small greeting touch based on time
+            const greeting = document.getElementById('greeting-time');
+            if(h < 12) greeting.innerText = "Buenos días 👋";
+            else if(h < 19) greeting.innerText = "Buenas tardes ☀️";
+            else greeting.innerText = "Buenas noches 🌙";
         }
 
-        function stopBreathing() {
-            document.getElementById('breathing-modal').style.display = 'none';
-            document.getElementById('breathe-circle').classList.remove('animate-breathing');
-            clearTimeout(breathingTimeout1);
-            clearTimeout(breathingTimeout2);
-            clearTimeout(breathingTimeout3);
+        function createStars() {
+            const sc = document.getElementById('stars-container'); 
+            if(sc.innerHTML !== '') return;
+            for(let i=0; i<60; i++){
+                const s = document.createElement('div'); 
+                s.className='star';
+                s.style.width='2px'; 
+                s.style.height='2px';
+                s.style.top=Math.random()*100+'%'; 
+                s.style.left=Math.random()*100+'%';
+                s.style.opacity = Math.random() * 0.8 + 0.2;
+                sc.appendChild(s);
+            }
         }
 
-        // === FUNCIONES DINÁMICAS: INTERESES PERFIL ===
-        let tempInterests = [];
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.getElementById(`tab-${id}`).classList.remove('hidden');
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-nav', 'text-[var(--andina-green)]'));
+            document.getElementById(`nav-${id}`).classList.add('active-nav', 'text-[var(--andina-green)]');
+        }
 
-        function renderProfileInterests() {
-            const container = document.getElementById('userInterestsContainer');
+        function openMapModal() {
+            document.getElementById('map-city-label').innerText = currentCity.toUpperCase();
+            const list = document.getElementById('buildings-list'); 
+            list.innerHTML = '';
+            const data = database[currentCity] || database["Bogotá"];
+            
+            // Replaced YOUR_KEY_HERE with generic Google Maps iframe embed
+            document.getElementById('map-iframe').src = `https://maps.google.com/maps?q=${data.edificios[0].q}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+            
+            data.edificios.forEach(ed => {
+                const item = document.createElement('div');
+                item.className = 'bg-white p-5 rounded-3xl border border-slate-100 flex flex-col gap-3 shadow-sm transition hover:shadow-md';
+                item.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-[#002D62] text-white flex items-center justify-center flex-shrink-0">
+                            <i class="ph-fill ph-buildings"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-sm font-bold text-[#002D62] leading-tight">${ed.n}</h5>
+                            <p class="text-[10px] text-slate-400 mt-0.5">${ed.d}</p>
+                        </div>
+                    </div>
+                    <button onclick="window.open('https://www.google.com/maps/search/${ed.q}')" class="w-full py-3 bg-green-50 text-[#6DBB2D] hover:bg-[#6DBB2D] hover:text-white transition-colors rounded-xl text-[10px] font-bold">
+                        Cómo llegar
+                    </button>
+                `;
+                list.appendChild(item);
+            });
+            document.getElementById('map-modal').style.display = 'flex';
+        }
+
+        const campusExtraData = {
+            'tutorias': {
+                title: "Tutorías Académicas",
+                desc: "Clases más frecuentadas",
+                bg: "bg-blue-50",
+                text: "text-blue-500",
+                icon: "ph-student",
+                items: [
+                    { t: "Cálculo Diferencial", d: "Refuerzo para ingenierías y administración" },
+                    { t: "Inglés Nivel B1", d: "Práctica interactiva de speaking y grammar" },
+                    { t: "Programación Básica", d: "Lógica y algoritmos en Python/Java" },
+                    { t: "Anatomía Humana", d: "Estudio de sistemas para ciencias de la salud" },
+                    { t: "Lectoescritura", d: "Redacción de textos académicos y ensayos" }
+                ]
+            },
+            'cultura': {
+                title: "Grupos Culturales",
+                desc: "Actividades más frecuentes",
+                bg: "bg-orange-50",
+                text: "text-orange-500",
+                icon: "ph-palette",
+                items: [
+                    { t: "Grupo de Danzas", d: "Folclor colombiano y ritmos modernos" },
+                    { t: "Teatro Areandina", d: "Expresión corporal, improvisación y actuación" },
+                    { t: "Coro Institucional", d: "Técnica vocal y ensamble musical" },
+                    { t: "Taller de Dibujo", d: "Técnicas de bocetaje, carboncillo y acuarela" },
+                    { t: "Club de Fotografía", d: "Composición visual y salidas de campo" }
+                ]
+            }
+        };
+
+        function openListModal(type) {
+            const data = campusExtraData[type];
+            document.getElementById('list-modal-title').innerText = data.title;
+            document.getElementById('list-modal-desc').innerText = data.desc;
+            
+            const container = document.getElementById('dynamic-list-container');
             container.innerHTML = '';
             
-            userInterests.forEach(id => {
-                const interest = allInterests.find(i => i.id === id);
-                if(interest) {
-                    const span = document.createElement('span');
-                    span.className = `px-3 py-1.5 bg-${interest.color}-50 text-${interest.color}-700 border border-${interest.color}-100 text-xs font-medium rounded-lg flex items-center`;
-                    span.innerHTML = `${interest.label}`;
-                    container.appendChild(span);
-                }
-            });
-
-            // Botón añadir final
-            const addBtn = document.createElement('button');
-            addBtn.className = "px-3 py-1.5 border border-dashed border-slate-300 text-slate-500 text-xs font-medium rounded-lg flex items-center hover:bg-slate-100 transition-colors";
-            addBtn.innerHTML = '<i class="ph-bold ph-plus mr-1"></i> Editar';
-            addBtn.onclick = openInterestsModal;
-            container.appendChild(addBtn);
-        }
-
-        function openInterestsModal() {
-            tempInterests = [...userInterests]; // Copiar actuales
-            const grid = document.getElementById('interests-grid');
-            grid.innerHTML = '';
-
-            allInterests.forEach(interest => {
-                const isSelected = tempInterests.includes(interest.id);
-                const btn = document.createElement('button');
-                
-                if (isSelected) {
-                    btn.className = `px-4 py-2 bg-${interest.color}-500 text-white border border-${interest.color}-500 text-sm font-medium rounded-xl flex items-center transition-all`;
-                } else {
-                    btn.className = `px-4 py-2 bg-slate-50 text-slate-600 border border-slate-200 text-sm font-medium rounded-xl flex items-center transition-all`;
-                }
-                
-                btn.innerHTML = interest.label;
-                
-                btn.onclick = () => {
-                    if (tempInterests.includes(interest.id)) {
-                        tempInterests = tempInterests.filter(id => id !== interest.id); // Remover
-                        btn.className = `px-4 py-2 bg-slate-50 text-slate-600 border border-slate-200 text-sm font-medium rounded-xl flex items-center transition-all`;
-                    } else {
-                        tempInterests.push(interest.id); // Añadir
-                        btn.className = `px-4 py-2 bg-${interest.color}-500 text-white border border-${interest.color}-500 text-sm font-medium rounded-xl flex items-center transition-all`;
-                    }
+            data.items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'bg-white p-5 rounded-3xl border border-slate-100 flex items-center gap-4 shadow-sm transition hover:shadow-md cursor-pointer';
+                div.onclick = () => { 
+                    closeModals(); 
+                    setTimeout(() => openForm(item.t, 'Inscripción a: ' + item.t), 300); 
                 };
-                
-                grid.appendChild(btn);
+                div.innerHTML = `
+                    <div class="w-10 h-10 rounded-xl ${data.bg} ${data.text} flex items-center justify-center flex-shrink-0">
+                        <i class="ph-fill ${data.icon} text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h5 class="text-sm font-bold text-slate-800 leading-tight">${item.t}</h5>
+                        <p class="text-[10px] text-slate-400 mt-0.5">${item.d}</p>
+                    </div>
+                    <i class="ph-bold ph-caret-right text-slate-300"></i>
+                `;
+                container.appendChild(div);
             });
-
-            document.getElementById('interests-modal').style.display = 'flex';
-        }
-
-        function saveInterests() {
-            userInterests = [...tempInterests];
-            renderProfileInterests();
-            closeModals();
-        }
-
-        // === FUNCIONES DINÁMICAS: DIARIO (NUEVO) ===
-        function openJournalModal() {
-            document.getElementById('journal-text').value = ''; // Limpiar textarea
-            document.getElementById('journal-modal').style.display = 'flex';
-        }
-
-        function saveJournal() {
-            const text = document.getElementById('journal-text').value;
-            if(text.trim() === '') {
-                showToast("Escribe algo antes de guardar", "✍️");
-                return;
-            }
-            closeModals();
-            showToast("Tu reflexión ha sido guardada en privado", "📔");
-        }
-
-        // === SISTEMA MOTIVACIONAL Y ESTADO DE ÁNIMO ===
-        let motivationInterval;
-        const motivationalQuotes = [
-            "Respira profundo, tú puedes con esto. 🌱",
-            "Un paso a la vez es suficiente. 🚶‍♂️",
-            "Eres más fuerte de lo que crees. 💪",
-            "Está bien pedir ayuda si la necesitas. 🤝",
-            "Hoy es un buen día para intentar de nuevo. ☀️"
-        ];
-
-        function showToast(message, icon = "✨") {
-            const toast = document.getElementById('toast-notification');
-            document.getElementById('toast-icon').innerText = icon;
-            document.getElementById('toast-message').innerText = message;
             
-            // Animación de entrada
-            toast.classList.remove('toast-leave');
-            toast.classList.add('toast-enter');
-
-            // Ocultar después de 4 segundos
-            setTimeout(() => {
-                toast.classList.remove('toast-enter');
-                toast.classList.add('toast-leave');
-            }, 4000);
+            document.getElementById('list-modal').style.display = 'flex';
         }
 
-        function startMotivationalMessages() {
-            // Mostrar un mensaje a los 3 segundos
-            setTimeout(() => {
-                const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
-                showToast(randomQuote);
-            }, 3000);
-
-            // Luego repetir cada 15 segundos (para la demostración)
-            motivationInterval = setInterval(() => {
-                const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
-                showToast(randomQuote);
-            }, 15000);
+        function openForm(t, d) { 
+            document.getElementById('form-title').innerText=t; 
+            document.getElementById('form-desc').innerText=d; 
+            document.getElementById('form-modal').style.display='flex'; 
         }
 
-        function stopMotivationalMessages() {
-            if (motivationInterval) {
-                clearInterval(motivationInterval);
-            }
+        function confirmForm(e) { 
+            e.preventDefault(); 
+            closeModals(); 
+            showToast(); 
         }
 
-        // Feedback Estado de Ánimo
-        function selectMood(mood) {
-            // Limpiar estados previos
-            document.querySelectorAll('.mood-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-100', 'border-blue-300', 'bg-amber-100', 'border-amber-300', 'bg-green-100', 'border-green-300');
-                btn.classList.add('bg-slate-100', 'border-transparent');
-            });
-
-            stopMotivationalMessages(); // Detener mensajes motivacionales si existían
-            
-            // Referencias de UI
-            const feedbackDiv = document.getElementById('moodFeedback');
-            const selectedBtn = document.querySelector(`[data-mood="${mood}"]`);
-            const sunEffect = document.getElementById('sun-effect');
-            const cloudEffect = document.getElementById('cloud-effect');
-            const mainContainer = document.getElementById('main-bg-container');
-            
-            // Limpiar estilos de feedback y fondos
-            feedbackDiv.classList.remove('hidden', 'bg-blue-50', 'text-blue-800', 'border-blue-200', 'bg-amber-50', 'text-amber-800', 'border-amber-200', 'bg-green-50', 'text-green-800', 'border-green-200');
-            sunEffect.classList.replace('opacity-50', 'opacity-0');
-            cloudEffect.classList.replace('opacity-40', 'opacity-0');
-            mainContainer.classList.remove('bg-blue-50/50', 'bg-amber-50/50');
-
-            if (mood === 'mal') {
-                selectedBtn.classList.replace('bg-slate-100', 'bg-blue-100');
-                selectedBtn.classList.replace('border-transparent', 'border-blue-300');
-                
-                // Efecto Nubes / Azul
-                cloudEffect.classList.replace('opacity-0', 'opacity-40');
-                mainContainer.classList.add('bg-blue-50/50');
-
-                feedbackDiv.classList.add('bg-blue-50', 'text-blue-800', 'border-blue-200');
-                feedbackDiv.innerHTML = `<div class="flex items-start space-x-3"><i class="ph-fill ph-info text-xl text-blue-500 mt-0.5"></i><div><p class="font-bold text-blue-900 mb-1">Es válido sentirse así.</p><p>Te recomendamos hacer el ejercicio de respiración o contactar a un mentor vía WhatsApp hoy.</p></div></div>`;
-                
-                // Lanzar modal proactivo después de 1 segundo
-                setTimeout(() => {
-                    document.getElementById('urgent-modal').style.display = 'flex';
-                }, 1000);
-
-            } else if (mood === 'regular') {
-                selectedBtn.classList.replace('bg-slate-100', 'bg-amber-100');
-                selectedBtn.classList.replace('border-transparent', 'border-amber-300');
-                
-                // Efecto Neutro/Cálido tenue
-                mainContainer.classList.add('bg-amber-50/50');
-
-                feedbackDiv.classList.add('bg-amber-50', 'text-amber-800', 'border-amber-200');
-                feedbackDiv.innerHTML = `<div class="flex items-start space-x-3"><i class="ph-fill ph-lightbulb text-xl text-amber-500 mt-0.5"></i><div><p class="font-bold text-amber-900 mb-1">Un día a la vez.</p><p>¿Qué tal si organizamos tus tareas usando la técnica Pomodoro o reservas una sesión de Yoga?</p></div></div>`;
-                
-                // Iniciar mensajes motivacionales (Toast)
-                startMotivationalMessages();
-
-            } else {
-                selectedBtn.classList.replace('bg-slate-100', 'bg-green-100');
-                selectedBtn.classList.replace('border-transparent', 'border-green-300');
-                
-                // Efecto de Sol (Vibra Positiva)
-                sunEffect.classList.replace('opacity-0', 'opacity-50');
-
-                feedbackDiv.classList.add('bg-green-50', 'text-green-800', 'border-green-200');
-                feedbackDiv.innerHTML = `<div class="flex items-start space-x-3"><i class="ph-fill ph-star text-xl text-green-500 mt-0.5"></i><div><p class="font-bold text-green-900 mb-1">¡Qué buena noticia!</p><p>Aprovecha esta energía para avanzar en tus proyectos. ¡Sigue así!</p></div></div>`;
-            }
+        function showToast() { 
+            const t = document.getElementById('toast'); 
+            t.style.opacity='1'; 
+            t.style.transform='translate(-50%, 0)';
+            setTimeout(() => { 
+                t.style.opacity='0'; 
+                t.style.transform='translate(-50%, -10px)'; 
+            }, 3500);
         }
 
-        function showSosModal() {
-            closeModals(); // Cerrar otros modales si están abiertos
-            showModal("Línea de Crisis Nacional: 01 8000 123 456\nTodo es 100% confidencial.", "Línea Activa", "📞");
+        function closeModals() { 
+            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display='none'); 
         }
+
+        // Init
+        loadPsychologists();
+        updateTimeCycle();
+        switchTab('inicio');
     </script>
+</body>
+</html>
 </body>
 </html>

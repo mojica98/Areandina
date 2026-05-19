@@ -451,25 +451,32 @@
 
         let currentCity = "Bogotá";
 
-        // Initialize Psychologists List via JS (Removed inline document.write)
+        // Initialize Psychologists List via JS
         function loadPsychologists() {
             const psis = [
-                {n:'Dr. Carlos M.', r:'Psicología', i:11}, {n:'Dra. Laura C.', r:'Salud Mental', i:5},
-                {n:'Dr. Andrés G.', r:'Bienestar', i:33}, {n:'Dra. Sofía R.', r:'Crisis', i:44},
-                {n:'Dr. Mateo P.', r:'Orientador', i:59}, {n:'Dra. Valeria T.', r:'Psicóloga', i:49},
-                {n:'Dr. Felipe M.', r:'Desarrollo', i:12}
+                {n:'Dr. Carlos M.', r:'Psicología', i:11, p: '+57 310 8676683'},
+                {n:'Dra. Laura C.', r:'Salud Mental', i:5, p: '+57 313 8304387'},
+                {n:'Dr. Andrés G.', r:'Bienestar', i:33, p: '+57 320 2660240'},
+                {n:'Dra. Sofía R.', r:'Crisis', i:44, p: '+57 322 7969368'},
+                {n:'Dr. Mateo P.', r:'Orientador', i:59, p: '+57 310 8676683'},
+                {n:'Dra. Valeria T.', r:'Psicóloga', i:49, p: '+57 313 8304387'},
+                {n:'Dr. Felipe M.', r:'Desarrollo', i:12, p: '+57 320 2660240'}
             ];
             
             const container = document.getElementById('psicologos-container');
             let htmlContent = '';
             
             psis.forEach(p => {
+                const phoneUrl = p.p.replace(/\D/g, ''); // Limpia los espacios y signos para la URL
                 htmlContent += `
-                    <div class="w-[125px] flex-shrink-0 snap-start glass p-4 flex flex-col items-center text-center space-y-2 cursor-pointer hover:bg-white/50 transition-colors">
+                    <div onclick="window.open('https://wa.me/${phoneUrl}', '_blank')" class="w-[125px] flex-shrink-0 snap-start glass p-4 flex flex-col items-center text-center space-y-2 cursor-pointer hover:bg-white/50 transition-colors active:scale-95">
                         <img src="https://i.pravatar.cc/150?img=${p.i}" alt="${p.n}" class="w-14 h-14 rounded-2xl border-2 border-white shadow-sm object-cover">
                         <div>
                             <h5 class="text-[11px] font-bold text-slate-900 leading-tight">${p.n}</h5>
                             <p class="text-[9px] font-bold text-[#6DBB2D] uppercase mt-0.5">${p.r}</p>
+                            <p class="text-[8px] text-slate-500 font-bold mt-1.5 flex items-center justify-center gap-1 bg-white/60 py-1 px-1.5 rounded-lg shadow-sm">
+                                <i class="ph-fill ph-whatsapp-logo text-green-500 text-[10px]"></i> ${p.p}
+                            </p>
                         </div>
                     </div>
                 `;
@@ -578,10 +585,10 @@
                 text: "text-blue-500",
                 icon: "ph-student",
                 items: [
-                    { t: "Cálculo Diferencial", d: "Refuerzo para ingenierías y administración" },
-                    { t: "Inglés Nivel B1", d: "Práctica interactiva de speaking y grammar" },
-                    { t: "Programación Básica", d: "Lógica y algoritmos en Python/Java" },
-                    { t: "Anatomía Humana", d: "Estudio de sistemas para ciencias de la salud" },
+                    { t: "Cálculo Diferencial", d: "Refuerzo para ingenierías y administración", p: "+57 310 8676683" },
+                    { t: "Inglés Nivel B1", d: "Práctica interactiva de speaking y grammar", p: "+57 313 8304387" },
+                    { t: "Programación Básica", d: "Lógica y algoritmos en Python/Java", p: "+57 320 2660240" },
+                    { t: "Anatomía Humana", d: "Estudio de sistemas para ciencias de la salud", p: "+57 322 7969368" },
                     { t: "Lectoescritura", d: "Redacción de textos académicos y ensayos" }
                 ]
             },
@@ -616,6 +623,9 @@
                     closeModals(); 
                     setTimeout(() => openForm(item.t, 'Inscripción a: ' + item.t), 300); 
                 };
+                
+                const phoneHtml = item.p ? `<div class="mt-2"><span class="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 text-green-700 hover:bg-green-100 transition-colors rounded-lg text-[9px] font-bold" onclick="event.stopPropagation(); window.open('https://wa.me/${item.p.replace(/\D/g, '')}', '_blank')"><i class="ph-fill ph-whatsapp-logo text-xs"></i> Contactar: ${item.p}</span></div>` : '';
+
                 div.innerHTML = `
                     <div class="w-10 h-10 rounded-xl ${data.bg} ${data.text} flex items-center justify-center flex-shrink-0">
                         <i class="ph-fill ${data.icon} text-xl"></i>
@@ -623,6 +633,7 @@
                     <div class="flex-1">
                         <h5 class="text-sm font-bold text-slate-800 leading-tight">${item.t}</h5>
                         <p class="text-[10px] text-slate-400 mt-0.5">${item.d}</p>
+                        ${phoneHtml}
                     </div>
                     <i class="ph-bold ph-caret-right text-slate-300"></i>
                 `;
@@ -663,7 +674,5 @@
         updateTimeCycle();
         switchTab('inicio');
     </script>
-</body>
-</html>
 </body>
 </html>
